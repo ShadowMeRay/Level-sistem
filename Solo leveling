@@ -1,0 +1,208 @@
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+
+export default function LifeRPG() {
+  const [quests, setQuests] = useState([]);
+  const [xp, setXp] = useState(0);
+  const [newQuest, setNewQuest] = useState("");
+  const [level, setLevel] = useState(1);
+
+  const [achievements, setAchievements] = useState([]);
+  const [newAchievement, setNewAchievement] = useState("");
+
+  const [shopItems, setShopItems] = useState([]);
+  const [newShopItem, setNewShopItem] = useState("");
+
+  useEffect(() => {
+    const saved = JSON.parse(localStorage.getItem("lifeRPG"));
+    if (saved) {
+      setQuests(saved.quests || []);
+      setXp(saved.xp || 0);
+      setLevel(saved.level || 1);
+      setAchievements(saved.achievements || []);
+      setShopItems(saved.shopItems || []);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(
+      "lifeRPG",
+      JSON.stringify({ quests, xp, level, achievements, shopItems })
+    );
+  }, [quests, xp, level, achievements, shopItems]);
+
+  const addQuest = () => {
+    if (!newQuest) return;
+    setQuests([...quests, { text: newQuest, done: false }]);
+    setNewQuest("");
+  };
+
+  const completeQuest = (index) => {
+    const updated = [...quests];
+    if (!updated[index].done) {
+      updated[index].done = true;
+      setXp(xp + 50);
+      if (xp + 50 >= level * 100) setLevel(level + 1);
+    }
+    setQuests(updated);
+  };
+
+  const deleteQuest = (index) => {
+    const updated = [...quests];
+    updated.splice(index, 1);
+    setQuests(updated);
+  };
+
+  const addAchievement = () => {
+    if (!newAchievement) return;
+    setAchievements([...achievements, newAchievement]);
+    setNewAchievement("");
+  };
+
+  const deleteAchievement = (index) => {
+    const updated = [...achievements];
+    updated.splice(index, 1);
+    setAchievements(updated);
+  };
+
+  const addShopItem = () => {
+    if (!newShopItem) return;
+    setShopItems([...shopItems, newShopItem]);
+    setNewShopItem("");
+  };
+
+  const deleteShopItem = (index) => {
+    const updated = [...shopItems];
+    updated.splice(index, 1);
+    setShopItems(updated);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-purple-300 p-6">
+      <h1 className="text-3xl font-bold mb-4 text-center text-purple-400">
+        Solo Leveling RPG System
+      </h1>
+
+      {/* XP & Level */}
+      <div className="text-center mb-8">
+        <p className="text-xl">Level: {level}</p>
+        <p className="text-xl">XP: {xp}</p>
+      </div>
+
+      {/* Quests */}
+      <div className="mb-10">
+        <h2 className="text-2xl mb-2 text-cyan-400">Quests</h2>
+        <div className="flex mb-2 gap-2">
+          <input
+            value={newQuest}
+            onChange={(e) => setNewQuest(e.target.value)}
+            placeholder="New quest"
+            className="flex-1 p-2 bg-gray-800 rounded"
+          />
+          <button
+            onClick={addQuest}
+            className="bg-purple-600 px-4 rounded hover:bg-purple-700"
+          >
+            Add
+          </button>
+        </div>
+        <ul className="space-y-2">
+          {quests.map((q, i) => (
+            <li
+              key={i}
+              className="flex justify-between items-center bg-gray-800 p-2 rounded"
+            >
+              <span className={q.done ? "line-through" : ""}>{q.text}</span>
+              <div className="space-x-2">
+                {!q.done && (
+                  <button
+                    onClick={() => completeQuest(i)}
+                    className="bg-green-600 px-2 rounded"
+                  >
+                    ✔
+                  </button>
+                )}
+                <button
+                  onClick={() => deleteQuest(i)}
+                  className="bg-red-600 px-2 rounded"
+                >
+                  ✖
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Achievements */}
+      <div className="mb-10">
+        <h2 className="text-2xl mb-2 text-yellow-400">Achievements</h2>
+        <div className="flex mb-2 gap-2">
+          <input
+            value={newAchievement}
+            onChange={(e) => setNewAchievement(e.target.value)}
+            placeholder="New achievement"
+            className="flex-1 p-2 bg-gray-800 rounded"
+          />
+          <button
+            onClick={addAchievement}
+            className="bg-yellow-600 px-4 rounded hover:bg-yellow-700"
+          >
+            Add
+          </button>
+        </div>
+        <ul className="space-y-2">
+          {achievements.map((a, i) => (
+            <li
+              key={i}
+              className="flex justify-between items-center bg-gray-800 p-2 rounded"
+            >
+              <span>{a}</span>
+              <button
+                onClick={() => deleteAchievement(i)}
+                className="bg-red-600 px-2 rounded"
+              >
+                ✖
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Shop */}
+      <div>
+        <h2 className="text-2xl mb-2 text-pink-400">Shop</h2>
+        <div className="flex mb-2 gap-2">
+          <input
+            value={newShopItem}
+            onChange={(e) => setNewShopItem(e.target.value)}
+            placeholder="New shop item"
+            className="flex-1 p-2 bg-gray-800 rounded"
+          />
+          <button
+            onClick={addShopItem}
+            className="bg-pink-600 px-4 rounded hover:bg-pink-700"
+          >
+            Add
+          </button>
+        </div>
+        <ul className="space-y-2">
+          {shopItems.map((s, i) => (
+            <li
+              key={i}
+              className="flex justify-between items-center bg-gray-800 p-2 rounded"
+            >
+              <span>{s}</span>
+              <button
+                onClick={() => deleteShopItem(i)}
+                className="bg-red-600 px-2 rounded"
+              >
+                ✖
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
