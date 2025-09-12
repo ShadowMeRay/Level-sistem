@@ -7,69 +7,6 @@
 
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-#app{display:flex;gap:18px;padding:20px;height:100vh}
-
-/* Panels */
-.panel{background:var(--panel-bg);border-radius:14px;padding:18px;box-shadow:0 6px 24px rgba(0,0,0,0.6);overflow:auto}
-.left{width:280px;flex:0 0 280px}
-.center{flex:1;display:flex;flex-direction:column;align-items:center}
-.right{width:300px;flex:0 0 300px}
-
-/* Headings */
-h1{color:var(--accent);margin:0 0 12px;font-size:20px}
-h2{color:var(--accent);margin:14px 0}
-
-/* Stats */
-.stat{margin-bottom:12px}
-.stat-row{display:flex;justify-content:space-between;align-items:center;margin:6px 0}
-.stat-row small{opacity:.7}
-.xp-bar{background:rgba(255,255,255,0.06);border-radius:10px;height:12px;overflow:hidden;margin-top:8px}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#8af1ff);width:0%;transition:width .5s}
-
-/* Lists */
-.list{list-style:none;padding:0;margin:8px 0}
-.list li{background:rgba(0,0,0,0.4);margin:6px 0;padding:8px;border-radius:8px;display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:14px}
-.missions-wrap{width:100%;display:flex;justify-content:center}
-.missions-list{list-style:none;padding:0;width:100%;max-width:720px}
-
-/* Mission item centered card */
-.missions-list li{display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03)}
-.mission-row{display:flex;justify-content:space-between;align-items:center;gap:10px}
-.mission-title{font-weight:600;color:#fff}
-.mission-desc{font-size:13px;color:rgba(255,255,255,0.75);margin-top:6px}
-
-/* Buttons and form */
-.btn{background:var(--accent);color:#051018;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}
-.btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
-.btn.small{padding:6px 8px;font-size:13px}
-
-.form{width:100%;max-width:720px;display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
-.form input,.form textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:var(--text)}
-.form textarea{min-height:68px;resize:vertical}
-.form-row{display:flex;gap:10px}
-
-/* inputs in side panels */
-aside input[type="text"], aside input[type="color"], aside input[type="url"], .add-ach input{width:100%;padding:8px;margin:6px 0;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:var(--text)}
-.add-ach input{display:block}
-
-/* small helpers */
-.hidden{display:none}
-.small{font-size:13px;padding:6px}
-
-/* Responsive */
-@media (max-width: 980px){
-  #app{flex-direction:column;padding:12px}
-  .left,.right{width:100%;flex:0 0 auto}
-  .center{order:1}
-  :root {
-  --bg: linear-gradient(180deg,#0d0d0d,#121212);
-  --accent: #00f7ff;
-  --panel-bg: rgba(20,20,20,0.9);
-  --text: #eef6f8;
-}
-
-*{box-sizing:border-box}
-html,body{height:100%;margin:0;font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
 #topbar{padding:10px;background:transparent;display:flex;justify-content:center}
 #auth-panel{display:flex;gap:8px;align-items:center}
 #auth-panel img{width:34px;height:34px;border-radius:50%}
@@ -123,6 +60,4 @@ aside input[type="text"], aside input[type="color"], aside input[type="url"], .a
 @media (max-width:980px){
   #app{flex-direction:column;height:auto;padding:12px}
   .left,.right{width:100%;flex:0 0 auto}
-}
-
 }
