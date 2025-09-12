@@ -1,208 +1,156 @@
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-
-export default function LifeRPG() {
-  const [quests, setQuests] = useState([]);
-  const [xp, setXp] = useState(0);
-  const [newQuest, setNewQuest] = useState("");
-  const [level, setLevel] = useState(1);
-
-  const [achievements, setAchievements] = useState([]);
-  const [newAchievement, setNewAchievement] = useState("");
-
-  const [shopItems, setShopItems] = useState([]);
-  const [newShopItem, setNewShopItem] = useState("");
-
-  useEffect(() => {
-    const saved = JSON.parse(localStorage.getItem("lifeRPG"));
-    if (saved) {
-      setQuests(saved.quests || []);
-      setXp(saved.xp || 0);
-      setLevel(saved.level || 1);
-      setAchievements(saved.achievements || []);
-      setShopItems(saved.shopItems || []);
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Level System</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f111a;
+      color: #f0f0f0;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(
-      "lifeRPG",
-      JSON.stringify({ quests, xp, level, achievements, shopItems })
-    );
-  }, [quests, xp, level, achievements, shopItems]);
-
-  const addQuest = () => {
-    if (!newQuest) return;
-    setQuests([...quests, { text: newQuest, done: false }]);
-    setNewQuest("");
-  };
-
-  const completeQuest = (index) => {
-    const updated = [...quests];
-    if (!updated[index].done) {
-      updated[index].done = true;
-      setXp(xp + 50);
-      if (xp + 50 >= level * 100) setLevel(level + 1);
+    header {
+      background: #1a1f2e;
+      width: 100%;
+      padding: 15px;
+      text-align: center;
+      font-size: 24px;
+      font-weight: bold;
+      border-bottom: 2px solid #333;
     }
-    setQuests(updated);
-  };
-
-  const deleteQuest = (index) => {
-    const updated = [...quests];
-    updated.splice(index, 1);
-    setQuests(updated);
-  };
-
-  const addAchievement = () => {
-    if (!newAchievement) return;
-    setAchievements([...achievements, newAchievement]);
-    setNewAchievement("");
-  };
-
-  const deleteAchievement = (index) => {
-    const updated = [...achievements];
-    updated.splice(index, 1);
-    setAchievements(updated);
-  };
-
-  const addShopItem = () => {
-    if (!newShopItem) return;
-    setShopItems([...shopItems, newShopItem]);
-    setNewShopItem("");
-  };
-
-  const deleteShopItem = (index) => {
-    const updated = [...shopItems];
-    updated.splice(index, 1);
-    setShopItems(updated);
-  };
-
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-purple-300 p-6">
-      <h1 className="text-3xl font-bold mb-4 text-center text-purple-400">
-        Solo Leveling RPG System
-      </h1>
-
-      {/* XP & Level */}
-      <div className="text-center mb-8">
-        <p className="text-xl">Level: {level}</p>
-        <p className="text-xl">XP: {xp}</p>
-      </div>
-
-      {/* Quests */}
-      <div className="mb-10">
-        <h2 className="text-2xl mb-2 text-cyan-400">Quests</h2>
-        <div className="flex mb-2 gap-2">
-          <input
-            value={newQuest}
-            onChange={(e) => setNewQuest(e.target.value)}
-            placeholder="New quest"
-            className="flex-1 p-2 bg-gray-800 rounded"
-          />
-          <button
-            onClick={addQuest}
-            className="bg-purple-600 px-4 rounded hover:bg-purple-700"
-          >
-            Add
-          </button>
-        </div>
-        <ul className="space-y-2">
-          {quests.map((q, i) => (
-            <li
-              key={i}
-              className="flex justify-between items-center bg-gray-800 p-2 rounded"
-            >
-              <span className={q.done ? "line-through" : ""}>{q.text}</span>
-              <div className="space-x-2">
-                {!q.done && (
-                  <button
-                    onClick={() => completeQuest(i)}
-                    className="bg-green-600 px-2 rounded"
-                  >
-                    ✔
-                  </button>
-                )}
-                <button
-                  onClick={() => deleteQuest(i)}
-                  className="bg-red-600 px-2 rounded"
-                >
-                  ✖
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Achievements */}
-      <div className="mb-10">
-        <h2 className="text-2xl mb-2 text-yellow-400">Achievements</h2>
-        <div className="flex mb-2 gap-2">
-          <input
-            value={newAchievement}
-            onChange={(e) => setNewAchievement(e.target.value)}
-            placeholder="New achievement"
-            className="flex-1 p-2 bg-gray-800 rounded"
-          />
-          <button
-            onClick={addAchievement}
-            className="bg-yellow-600 px-4 rounded hover:bg-yellow-700"
-          >
-            Add
-          </button>
-        </div>
-        <ul className="space-y-2">
-          {achievements.map((a, i) => (
-            <li
-              key={i}
-              className="flex justify-between items-center bg-gray-800 p-2 rounded"
-            >
-              <span>{a}</span>
-              <button
-                onClick={() => deleteAchievement(i)}
-                className="bg-red-600 px-2 rounded"
-              >
-                ✖
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {/* Shop */}
-      <div>
-        <h2 className="text-2xl mb-2 text-pink-400">Shop</h2>
-        <div className="flex mb-2 gap-2">
-          <input
-            value={newShopItem}
-            onChange={(e) => setNewShopItem(e.target.value)}
-            placeholder="New shop item"
-            className="flex-1 p-2 bg-gray-800 rounded"
-          />
-          <button
-            onClick={addShopItem}
-            className="bg-pink-600 px-4 rounded hover:bg-pink-700"
-          >
-            Add
-          </button>
-        </div>
-        <ul className="space-y-2">
-          {shopItems.map((s, i) => (
-            <li
-              key={i}
-              className="flex justify-between items-center bg-gray-800 p-2 rounded"
-            >
-              <span>{s}</span>
-              <button
-                onClick={() => deleteShopItem(i)}
-                className="bg-red-600 px-2 rounded"
-              >
-                ✖
-              </button>
-            </li>
-          ))}
-        </ul>
-      </div>
+    .container {
+      width: 90%;
+      max-width: 600px;
+      margin-top: 20px;
+    }
+    .card {
+      background: #1e2536;
+      border: 1px solid #333;
+      border-radius: 10px;
+      padding: 15px;
+      margin: 10px 0;
+    }
+    button {
+      background: #3a5cf4;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      color: #fff;
+      cursor: pointer;
+      margin-left: 5px;
+    }
+    button:hover {
+      background: #5874ff;
+    }
+    input {
+      padding: 5px;
+      border-radius: 6px;
+      border: 1px solid #333;
+      margin-top: 5px;
+    }
+    li {
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <header>🎮 Level System (Solo Leveling Style)</header>
+  <div class="container">
+    <div class="card">
+      <h2>🏆 Ачивки</h2>
+      <ul id="achievements"></ul>
+      <input type="text" id="newAchievement" placeholder="Новая ачивка" />
+      <button onclick="addAchievement()">Добавить</button>
     </div>
-  );
-}
+
+    <div class="card">
+      <h2>🛒 Магазин</h2>
+      <ul id="shop"></ul>
+      <input type="text" id="newShopItem" placeholder="Новый предмет" />
+      <button onclick="addShopItem()">Добавить</button>
+    </div>
+  </div>
+
+  <!-- Firebase -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+
+    // Твои настройки Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyDW4SQaVKDmU8kgQ1xO1IlCwKfMoACCLVY",
+      authDomain: "level-sistem.firebaseapp.com",
+      databaseURL: "https://level-sistem-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "level-sistem",
+      storageBucket: "level-sistem.firebasestorage.app",
+      messagingSenderId: "417407528186",
+      appId: "1:417407528186:web:95c01771786ad7971ced43"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const achRef = ref(db, "achievements");
+    const shopRef = ref(db, "shop");
+
+    // --- Добавление ---
+    window.addAchievement = function() {
+      const input = document.getElementById("newAchievement");
+      if (input.value.trim() !== "") {
+        push(achRef, input.value.trim());
+        input.value = "";
+      }
+    };
+
+    window.addShopItem = function() {
+      const input = document.getElementById("newShopItem");
+      if (input.value.trim() !== "") {
+        push(shopRef, input.value.trim());
+        input.value = "";
+      }
+    };
+
+    // --- Рендеринг с кнопками ---
+    function renderList(refObj, listId) {
+      onValue(refObj, (snapshot) => {
+        const list = document.getElementById(listId);
+        list.innerHTML = "";
+        snapshot.forEach((child) => {
+          const li = document.createElement("li");
+          const text = document.createElement("span");
+          text.textContent = child.val();
+          li.appendChild(text);
+
+          // Кнопка редактировать
+          const editBtn = document.createElement("button");
+          editBtn.textContent = "✏️";
+          editBtn.onclick = () => {
+            const newVal = prompt("Введите новое значение:", child.val());
+            if (newVal !== null && newVal.trim() !== "") {
+              update(child.ref, newVal);
+            }
+          };
+
+          // Кнопка удалить
+          const delBtn = document.createElement("button");
+          delBtn.textContent = "❌";
+          delBtn.onclick = () => remove(child.ref);
+
+          li.appendChild(editBtn);
+          li.appendChild(delBtn);
+          list.appendChild(li);
+        });
+      });
+    }
+
+    renderList(achRef, "achievements");
+    renderList(shopRef, "shop");
+  </script>
+</body>
+</html>
