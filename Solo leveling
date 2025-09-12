@@ -77,12 +77,12 @@
     </div>
   </div>
 
-  <!-- Firebase -->
+  <!-- Firebase и логика сайта -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
     import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-    // Твои настройки Firebase
+    // ⚡ Твои настройки Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDW4SQaVKDmU8kgQ1xO1IlCwKfMoACCLVY",
       authDomain: "level-sistem.firebaseapp.com",
@@ -90,7 +90,7 @@
       projectId: "level-sistem",
       storageBucket: "level-sistem.firebasestorage.app",
       messagingSenderId: "417407528186",
-      appId: "1:417407528186:web:95c01771786ad7971ced43"
+      appId: "1:417407528186:web:4e8d3f55fe3cf8871ced43"
     };
 
     const app = initializeApp(firebaseConfig);
