@@ -1,224 +1,80 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Level System</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: #0d0d0d;
-      color: #f0f0f0;
-      display: flex;
-      gap: 20px;
-      padding: 20px;
-    }
-    .panel {
-      background: #1a1a1a;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 0 10px rgba(0,247,255,0.2);
-      flex: 1;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    #left {
-      flex: 0.7;
-    }
-    #center {
-      flex: 1.5;
-    }
-    #right {
-      flex: 0.7;
-    }
-    h2 {
-      color: #00f7ff;
-      text-align: center;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      margin: 10px 0;
-      background: #00f7ff;
-      color: #111;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn:hover {
-      background: #00c2cc;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-    }
-    li {
-      background: #2a2a2a;
-      margin: 5px 0;
-      padding: 10px;
-      border-radius: 8px;
-    }
-    .xp-bar {
-      background: #333;
-      border-radius: 10px;
-      overflow: hidden;
-      margin-top: 5px;
-      height: 20px;
-    }
-    .xp-fill {
-      background: #00f7ff;
-      height: 100%;
-      width: 0%;
-      transition: width 0.5s;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Level System — Solo Leveling</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="app">
+    <!-- LEFT: progress + achievements -->
+    <aside class="panel left">
+      <h1>Прогресс</h1>
+      <div class="stat">
+        <div class="stat-row"><span>Уровень</span><strong id="level">1</strong></div>
+        <div class="stat-row"><span>XP</span><strong id="xp">0</strong> / <span id="xpNext">100</span></div>
+        <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+        <div class="stat-row small"><span>Очки</span><strong id="points">0</strong></div>
+      </div>
 
-  <!-- Левая панель: уровень -->
-  <div id="left" class="panel">
-    <h2>Твой прогресс</h2>
-    <p>Уровень: <span id="level">1</span></p>
-    <div class="xp-bar"><div id="xp-fill" class="xp-fill"></div></div>
-    <p>Опыт: <span id="xp">0</span> / <span id="xp-next">100</span></p>
+      <section class="ach">
+        <h2>Последние достижения</h2>
+        <ul id="recentAchievements" class="list"></ul>
+        <button id="toggleAllAchievements" class="btn small">Показать все достижения</button>
+        <ul id="allAchievements" class="list hidden"></ul>
+      </section>
 
-    <h3>Последние достижения</h3>
-    <ul id="recent-achievements"></ul>
-    <button class="btn" onclick="showAllAchievements()">Показать все</button>
-    <ul id="all-achievements" style="display:none;"></ul>
+      <section class="customize">
+        <h2>Кастомизация</h2>
+        <label>Фон (URL):<input id="bgUrl" placeholder="https://..." /></label>
+        <label>Основной цвет:<input id="mainColor" type="color" value="#00f7ff" /></label>
+        <button id="saveStyle" class="btn">Сохранить стиль</button>
+        <button id="resetStyle" class="btn ghost">Сбросить стиль</button>
+      </section>
+
+      <section class="add-ach">
+        <h2>Добавить достижение</h2>
+        <input id="achTitle" placeholder="Название" />
+        <input id="achDesc" placeholder="Описание (необязательно)" />
+        <button id="addAchievementBtn" class="btn">Добавить достижение</button>
+      </section>
+    </aside>
+
+    <!-- CENTER: missions -->
+    <main class="panel center">
+      <h1>Миссии</h1>
+
+      <form id="missionForm" class="form">
+        <input id="missionTitle" placeholder="Название миссии" required />
+        <input id="missionReward" placeholder="XP за выполнение (число)" type="number" required />
+        <textarea id="missionDesc" placeholder="Описание (необязательно)"></textarea>
+        <div class="form-row">
+          <button type="submit" class="btn">Добавить миссию</button>
+          <button type="button" id="clearMissions" class="btn ghost">Очистить все</button>
+        </div>
+      </form>
+
+      <section class="missions-wrap">
+        <ul id="missionsList" class="missions-list"></ul>
+      </section>
+    </main>
+
+    <!-- RIGHT: shop -->
+    <aside class="panel right">
+      <h1>Магазин</h1>
+
+      <section class="add-shop">
+        <input id="shopName" placeholder="Название предмета" />
+        <input id="shopCost" placeholder="Цена (очки)" type="number" />
+        <button id="addShopBtn" class="btn">Добавить в магазин</button>
+      </section>
+
+      <h2>Товары</h2>
+      <ul id="shopList" class="list"></ul>
+    </aside>
   </div>
 
-  <!-- Центр: миссии -->
-  <div id="center" class="panel">
-    <h2>🎯 Миссии</h2>
-    <button class="btn" onclick="addMission()">Добавить миссию</button>
-    <ul id="missions"></ul>
-  </div>
-
-  <!-- Правая панель: магазин -->
-  <div id="right" class="panel">
-    <h2>🛍 Магазин</h2>
-    <p>Очки: <span id="points">0</span></p>
-    <button class="btn" onclick="addShopItem()">Добавить предмет</button>
-    <ul id="shop"></ul>
-  </div>
-
-  <!-- Firebase v8 -->
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyDW4SQaVKDmU8kgQ1xO1IlCwKfMoACCLVY",
-      authDomain: "level-sistem.firebaseapp.com",
-      databaseURL: "https://level-sistem-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "level-sistem",
-      storageBucket: "level-sistem.firebasestorage.app",
-      messagingSenderId: "417407528186",
-      appId: "1:417407528186:web:4e8d3f55fe3cf8871ced43"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-
-    let level = 1, xp = 0, xpToNext = 100, points = 0;
-
-    const missionsEl = document.getElementById("missions");
-    const achievementsRecent = document.getElementById("recent-achievements");
-    const achievementsAll = document.getElementById("all-achievements");
-
-    function updateUI() {
-      document.getElementById("level").textContent = level;
-      document.getElementById("xp").textContent = xp;
-      document.getElementById("xp-next").textContent = xpToNext;
-      document.getElementById("points").textContent = points;
-      document.getElementById("xp-fill").style.width = (xp / xpToNext * 100) + "%";
-    }
-
-    function addMission() {
-      const title = prompt("Название миссии:");
-      const reward = parseInt(prompt("Сколько опыта даёт?"), 10);
-      if (!title || isNaN(reward)) return;
-      const key = db.ref("missions").push({ title, reward }).key;
-    }
-
-    function completeMission(key, reward, title) {
-      xp += reward;
-      if (xp >= xpToNext) {
-        xp -= xpToNext;
-        level++;
-        points += 10; // очки за уровень
-        xpToNext = Math.floor(xpToNext * 1.3);
-      }
-      db.ref("achievements").push({ title: "Выполнил: " + title });
-      db.ref("missions/" + key).remove();
-      updateUI();
-    }
-
-    db.ref("missions").on("value", snap => {
-      missionsEl.innerHTML = "";
-      snap.forEach(item => {
-        const m = item.val();
-        const li = document.createElement("li");
-        li.innerHTML = `<b>${m.title}</b> — ${m.reward} XP 
-          <button class="btn" style="margin-top:5px" 
-            onclick="completeMission('${item.key}', ${m.reward}, '${m.title}')">Выполнить</button>`;
-        missionsEl.appendChild(li);
-      });
-    });
-
-    db.ref("achievements").on("value", snap => {
-      achievementsRecent.innerHTML = "";
-      achievementsAll.innerHTML = "";
-      const items = [];
-      snap.forEach(item => items.push(item.val().title));
-      items.reverse();
-      items.slice(0, 3).forEach(t => {
-        const li = document.createElement("li");
-        li.textContent = t;
-        achievementsRecent.appendChild(li);
-      });
-      items.forEach(t => {
-        const li = document.createElement("li");
-        li.textContent = t;
-        achievementsAll.appendChild(li);
-      });
-    });
-
-    function showAllAchievements() {
-      achievementsAll.style.display = achievementsAll.style.display === "none" ? "block" : "none";
-    }
-
-    const shopEl = document.getElementById("shop");
-
-    function addShopItem() {
-      const name = prompt("Название предмета:");
-      const cost = parseInt(prompt("Цена в очках:"), 10);
-      if (!name || isNaN(cost)) return;
-      db.ref("shop").push({ name, cost });
-    }
-
-    function buyItem(key, cost, name) {
-      if (points < cost) return alert("Недостаточно очков!");
-      points -= cost;
-      alert("Куплен: " + name);
-      updateUI();
-    }
-
-    db.ref("shop").on("value", snap => {
-      shopEl.innerHTML = "";
-      snap.forEach(item => {
-        const s = item.val();
-        const li = document.createElement("li");
-        li.innerHTML = `<b>${s.name}</b> — ${s.cost} очков 
-          <button class="btn" style="margin-top:5px"
-            onclick="buyItem('${item.key}', ${s.cost}, '${s.name}')">Купить</button>`;
-        shopEl.appendChild(li);
-      });
-    });
-
-    updateUI();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
