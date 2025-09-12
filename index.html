@@ -6,83 +6,76 @@
   <title>Level System</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #0f111a;
-      color: #f0f0f0;
       margin: 0;
-      padding: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #0d0d0d, #1a1a1a);
+      color: #f0f0f0;
     }
     header {
-      background: #1a1f2e;
-      width: 100%;
-      padding: 15px;
+      background: #111;
+      padding: 20px;
       text-align: center;
-      font-size: 24px;
-      font-weight: bold;
-      border-bottom: 2px solid #333;
+      border-bottom: 2px solid #00f7ff;
+    }
+    header h1 {
+      margin: 0;
+      color: #00f7ff;
+      text-shadow: 0 0 10px #00f7ff;
     }
     .container {
-      width: 90%;
-      max-width: 600px;
-      margin-top: 20px;
+      max-width: 900px;
+      margin: 30px auto;
+      padding: 20px;
     }
     .card {
-      background: #1e2536;
+      background: #1e1e1e;
       border: 1px solid #333;
-      border-radius: 10px;
-      padding: 15px;
-      margin: 10px 0;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 15px rgba(0, 247, 255, 0.1);
     }
-    button {
-      background: #3a5cf4;
+    .card h2 {
+      margin-top: 0;
+      color: #00f7ff;
+    }
+    .btn {
+      background: #00f7ff;
+      color: #111;
       border: none;
-      padding: 6px 10px;
-      border-radius: 6px;
-      color: #fff;
+      padding: 10px 20px;
+      border-radius: 10px;
       cursor: pointer;
-      margin-left: 5px;
+      transition: 0.3s;
     }
-    button:hover {
-      background: #5874ff;
-    }
-    input {
-      padding: 5px;
-      border-radius: 6px;
-      border: 1px solid #333;
-      margin-top: 5px;
-    }
-    li {
-      margin: 5px 0;
+    .btn:hover {
+      background: #00c2cc;
     }
   </style>
 </head>
 <body>
-  <header>🎮 Level System (Solo Leveling Style)</header>
+  <header>
+    <h1>🌌 Level System</h1>
+  </header>
   <div class="container">
     <div class="card">
-      <h2>🏆 Ачивки</h2>
+      <h2>🎯 Цели и достижения</h2>
+      <p>Пока здесь нет достижений. Нажми, чтобы добавить новое!</p>
+      <button class="btn" onclick="addAchievement()">Добавить достижение</button>
       <ul id="achievements"></ul>
-      <input type="text" id="newAchievement" placeholder="Новая ачивка" />
-      <button onclick="addAchievement()">Добавить</button>
     </div>
 
     <div class="card">
-      <h2>🛒 Магазин</h2>
-      <ul id="shop"></ul>
-      <input type="text" id="newShopItem" placeholder="Новый предмет" />
-      <button onclick="addShopItem()">Добавить</button>
+      <h2>🛍 Магазин</h2>
+      <p>Скоро будет доступен магазин с наградами</p>
     </div>
   </div>
 
-  <!-- Firebase и логика сайта -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
-    import { getDatabase, ref, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+    import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
 
-    // ⚡ Твои настройки Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyDW4SQaVKDmU8kgQ1xO1IlCwKfMoACCLVY",
       authDomain: "level-sistem.firebaseapp.com",
@@ -96,61 +89,23 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const achRef = ref(db, "achievements");
-    const shopRef = ref(db, "shop");
+    const achievementsList = document.getElementById("achievements");
 
-    // --- Добавление ---
-    window.addAchievement = function() {
-      const input = document.getElementById("newAchievement");
-      if (input.value.trim() !== "") {
-        push(achRef, input.value.trim());
-        input.value = "";
-      }
-    };
-
-    window.addShopItem = function() {
-      const input = document.getElementById("newShopItem");
-      if (input.value.trim() !== "") {
-        push(shopRef, input.value.trim());
-        input.value = "";
-      }
-    };
-
-    // --- Рендеринг с кнопками ---
-    function renderList(refObj, listId) {
-      onValue(refObj, (snapshot) => {
-        const list = document.getElementById(listId);
-        list.innerHTML = "";
-        snapshot.forEach((child) => {
-          const li = document.createElement("li");
-          const text = document.createElement("span");
-          text.textContent = child.val();
-          li.appendChild(text);
-
-          // Кнопка редактировать
-          const editBtn = document.createElement("button");
-          editBtn.textContent = "✏️";
-          editBtn.onclick = () => {
-            const newVal = prompt("Введите новое значение:", child.val());
-            if (newVal !== null && newVal.trim() !== "") {
-              update(child.ref, newVal);
-            }
-          };
-
-          // Кнопка удалить
-          const delBtn = document.createElement("button");
-          delBtn.textContent = "❌";
-          delBtn.onclick = () => remove(child.ref);
-
-          li.appendChild(editBtn);
-          li.appendChild(delBtn);
-          list.appendChild(li);
-        });
-      });
+    function addAchievement() {
+      const title = prompt("Название достижения:");
+      if (!title) return;
+      push(ref(db, "achievements"), { title });
     }
 
-    renderList(achRef, "achievements");
-    renderList(shopRef, "shop");
+    onValue(ref(db, "achievements"), snapshot => {
+      achievementsList.innerHTML = "";
+      snapshot.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = "✅ " + item.val().title;
+        achievementsList.appendChild(li);
+      });
+    });
   </script>
 </body>
 </html>
+
