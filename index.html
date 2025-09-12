@@ -5,6 +5,105 @@
   <title>Level System</title>
 </head>
 <body>
+  <!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Level System — Синхронизированный</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="topbar">
+    <div id="auth-panel">
+      <div id="signed-out">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Пароль" />
+        <button id="registerBtn" class="btn">Регистрация</button>
+        <button id="loginBtn" class="btn">Вход</button>
+        <button id="googleBtn" class="btn">Вход через Google</button>
+      </div>
+
+      <div id="signed-in" style="display:none;">
+        <img id="user-photo" alt="avatar" />
+        <span id="user-name"></span>
+        <button id="logoutBtn" class="btn">Выйти</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app">
+    <!-- LEFT -->
+    <aside class="panel left">
+      <h1>Прогресс</h1>
+      <div class="stat">
+        <div class="stat-row"><span>Уровень</span><strong id="level">1</strong></div>
+        <div class="stat-row"><span>XP</span><strong id="xp">0</strong> / <span id="xpNext">100</span></div>
+        <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+        <div class="stat-row"><span>Очки</span><strong id="points">0</strong></div>
+      </div>
+
+      <section>
+        <h2>Последние достижения</h2>
+        <ul id="recentAchievements" class="list"></ul>
+        <button id="toggleAllAchievements" class="btn small">Показать все достижения</button>
+        <ul id="allAchievements" class="list hidden"></ul>
+      </section>
+
+      <section class="customize">
+        <h2>Кастомизация</h2>
+        <label>Фон (URL):<input id="bgUrl" placeholder="https://..." /></label>
+        <label>Основной цвет:<input id="mainColor" type="color" value="#00f7ff" /></label>
+        <button id="saveStyle" class="btn">Сохранить стиль</button>
+        <button id="resetStyle" class="btn ghost">Сбросить</button>
+      </section>
+
+      <section>
+        <h2>Добавить достижение</h2>
+        <input id="achTitle" placeholder="Название" />
+        <input id="achDesc" placeholder="Описание (опционально)" />
+        <button id="addAchievementBtn" class="btn">Добавить достижение</button>
+      </section>
+    </aside>
+
+    <!-- CENTER -->
+    <main class="panel center">
+      <h1>Миссии</h1>
+
+      <form id="missionForm" class="form">
+        <input id="missionTitle" placeholder="Название миссии" required />
+        <input id="missionReward" placeholder="XP за выполнение" type="number" required />
+        <textarea id="missionDesc" placeholder="Описание (необязательно)"></textarea>
+        <div class="form-row">
+          <button type="submit" class="btn">Добавить миссию</button>
+          <button type="button" id="clearMissions" class="btn ghost">Очистить все</button>
+        </div>
+      </form>
+
+      <section class="missions-wrap">
+        <ul id="missionsList" class="missions-list"></ul>
+      </section>
+    </main>
+
+    <!-- RIGHT -->
+    <aside class="panel right">
+      <h1>Магазин</h1>
+
+      <section class="add-shop">
+        <input id="shopName" placeholder="Название предмета" />
+        <input id="shopCost" placeholder="Цена (очки)" type="number" />
+        <button id="addShopBtn" class="btn">Добавить</button>
+      </section>
+
+      <h2>Товары</h2>
+      <ul id="shopList" class="list"></ul>
+    </aside>
+  </div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
+
   <div id="auth">
     <button id="loginBtn">Войти через Google</button>
     <button id="logoutBtn" style="display:none;">Выйти</button>
@@ -16,6 +115,7 @@
     <p>Очки: <span id="points">0</span></p>
     <button id="addPoints">Добавить 10 очков</button>
   </div>
+  
 
   <script type="module" src="script.js"></script>
 </body>
