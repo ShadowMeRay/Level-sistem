@@ -1,178 +1,92 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Миссии и магазин</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background-size: cover;
-      background-position: center;
-      transition: background 0.3s;
-      color: #fff;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 { margin-top: 0; }
-    .mission, .shop-item {
-      background: rgba(0,0,0,0.6);
-      margin: 10px auto;
-      padding: 10px;
-      border-radius: 10px;
-      max-width: 400px;
-    }
-    .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
-    .settings-panel {
-      position: fixed;
-      top: 0; right: -300px;
-      width: 300px; height: 100%;
-      background: rgba(0,0,0,0.85);
-      padding: 20px;
-      transition: right 0.3s;
-    }
-    .settings-panel.open { right: 0; }
-    .gear {
-      position: fixed; top: 20px; right: 20px;
-      font-size: 30px; cursor: pointer;
-    }
-    button {
-      padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;
-    }
-    button:disabled {
-      opacity: 0.5; cursor: not-allowed;
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Level System — Sync</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div id="topbar">
+    <div id="logoWrap"><img id="logoImg" src="" alt="logo" style="display:none;height:40px"></div>
+    <div id="auth-panel">
+      <div id="signed-out">
+        <input id="email" type="email" placeholder="Email" />
+        <input id="password" type="password" placeholder="Пароль" />
+        <button id="registerBtn" class="btn small">Регистрация</button>
+        <button id="loginBtn" class="btn small">Вход</button>
+        <button id="googleBtn" class="btn small">Google</button>
+      </div>
 
-  <h1>Мои миссии</h1>
-  <div id="missions"></div>
+      <div id="signed-in" style="display:none;align-items:center;gap:8px;">
+        <img id="userPhoto" src="" alt="avatar" style="width:34px;height:34px;border-radius:50%;display:none"/>
+        <span id="userName"></span>
+        <button id="logoutBtn" class="btn small">Выйти</button>
+      </div>
+    </div>
 
-  <h1>Магазин</h1>
-  <div>Монет: <span id="coins">0</span></div>
-  <div id="shop"></div>
-
-  <div class="gear">⚙️</div>
-  <div class="settings-panel" id="settingsPanel">
-    <h2>Настройки</h2>
-    <label>Фон: <input type="file" id="backgroundUpload" accept="image/*"></label>
-    <hr>
-    <button id="resetProgress">Сбросить прогресс</button>
+    <button id="gearBtn" title="Настройки">⚙️</button>
   </div>
 
-<script>
-  const missionsData = [
-    { id: 1, title: "Миссия 1", img: "", done: false },
-    { id: 2, title: "Миссия 2", img: "", done: false },
-    { id: 3, title: "Миссия 3", img: "", done: false }
-  ];
-  const shopData = [
-    { id: 1, name: "Товар 1", cost: 20, img: "" },
-    { id: 2, name: "Товар 2", cost: 30, img: "" }
-  ];
+  <div id="app">
+    <aside class="panel left" id="leftPanel">
+      <h1>Прогресс</h1>
+      <div class="stat-row"><span>Уровень</span><strong id="level">1</strong></div>
+      <div class="stat-row"><span>XP</span><strong id="xp">0</strong> / <span id="xpNext">100</span></div>
+      <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+      <div class="stat-row"><span>Монеты</span><strong id="coins">0</strong></div>
 
-  let coins = parseInt(localStorage.getItem("coins")) || 0;
-  let completed = JSON.parse(localStorage.getItem("completed")) || {};
+      <h2>Последние ачивки</h2>
+      <ul id="recentAchievements" class="list"></ul>
+      <button id="toggleAllAchievements" class="btn small">Показать все достижения</button>
+      <ul id="allAchievements" class="list hidden"></ul>
+    </aside>
 
-  const missionsDiv = document.getElementById("missions");
-  const shopDiv = document.getElementById("shop");
-  const coinsSpan = document.getElementById("coins");
+    <main class="panel center" id="centerPanel">
+      <h1>Миссии</h1>
 
-  function save() {
-    localStorage.setItem("coins", coins);
-    localStorage.setItem("completed", JSON.stringify(completed));
-  }
-
-  function renderMissions() {
-    missionsDiv.innerHTML = "";
-    missionsData.forEach(m => {
-      const wrap = document.createElement("div");
-      wrap.className = "mission";
-      wrap.innerHTML = `
-        <h3>${m.title}</h3>
-        <div class="buttons">
-          <button ${completed[m.id] ? "disabled" : ""} data-action="done" data-id="${m.id}">Выполнено</button>
-          <button ${completed[m.id] ? "disabled" : ""} data-action="fail" data-id="${m.id}">Провал</button>
+      <form id="missionForm" class="form">
+        <input id="missionTitle" placeholder="Название миссии" required />
+        <input id="missionXP" type="number" placeholder="XP за выполнение" required />
+        <input id="missionImg" placeholder="URL картинки (опционально)" />
+        <textarea id="missionDesc" placeholder="Описание (опционально)"></textarea>
+        <div class="form-row">
+          <button type="submit" class="btn">Добавить миссию</button>
+          <button type="button" id="clearMissions" class="btn ghost">Очистить активные миссии</button>
         </div>
-      `;
-      missionsDiv.appendChild(wrap);
-    });
-  }
+      </form>
 
-  function renderShop() {
-    shopDiv.innerHTML = "";
-    shopData.forEach(s => {
-      const wrap = document.createElement("div");
-      wrap.className = "shop-item";
-      wrap.innerHTML = `
-        <h3>${s.name}</h3>
-        <p>Цена: ${s.cost} монет</p>
-        <button data-buy="${s.id}">Купить</button>
-      `;
-      shopDiv.appendChild(wrap);
-    });
-  }
+      <section class="missions-wrap">
+        <ul id="missionsList" class="missions-list"></ul>
+      </section>
+    </main>
 
-  function updateCoins() {
-    coinsSpan.textContent = coins;
-    save();
-  }
+    <aside class="panel right" id="rightPanel">
+      <h1>Магазин</h1>
+      <input id="shopName" placeholder="Название предмета" />
+      <input id="shopCost" placeholder="Цена (монеты)" type="number" />
+      <input id="shopImg" placeholder="URL картинки (опционально)" />
+      <button id="addShopBtn" class="btn">Добавить в магазин</button>
 
-  document.body.addEventListener("click", e => {
-    if (e.target.dataset.action === "done" && !completed[e.target.dataset.id]) {
-      completed[e.target.dataset.id] = true;
-      coins += 10;
-      updateCoins();
-      renderMissions();
-    }
-    if (e.target.dataset.action === "fail" && !completed[e.target.dataset.id]) {
-      completed[e.target.dataset.id] = true;
-      renderMissions();
-    }
-    if (e.target.dataset.buy) {
-      const item = shopData.find(i => i.id == e.target.dataset.buy);
-      if (coins >= item.cost) {
-        coins -= item.cost;
-        updateCoins();
-        alert("Куплено: " + item.name);
-      } else {
-        alert("Недостаточно монет!");
-      }
-    }
-  });
+      <h2 style="margin-top:16px">Товары</h2>
+      <ul id="shopList" class="list"></ul>
 
-  document.querySelector(".gear").onclick = () => {
-    document.getElementById("settingsPanel").classList.toggle("open");
-  };
+      <div style="margin-top:20px">
+        <h2>Добавить достижение</h2>
+        <input id="achTitle" placeholder="Название" />
+        <input id="achDesc" placeholder="Описание (опционально)" />
+        <button id="addAchievementBtn" class="btn">Добавить достижение</button>
+      </div>
+    </aside>
+  </div>
 
-  document.getElementById("backgroundUpload").addEventListener("change", e => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        document.body.style.backgroundImage = `url('${reader.result}')`;
-        localStorage.setItem("background", reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  <!-- settings drawer -->
+  <div id="settingsDrawer">
+    <h2>Настройки</h2>
 
-  document.getElementById("resetProgress").addEventListener("click", () => {
-    if (confirm("Вы уверены, что хотите сбросить прогресс?") && confirm("Точно уверены?")) {
-      localStorage.clear();
-      location.reload();
-    }
-  });
+    <div class="drawer-section">
+      <strong>Фон</strong>
+      <label>Фон (URL): <input id="bgUrl" type="text" placeholder="https://..." /></label>
+      <label>Логотип (URL): <in
 
-  // при загрузке
-  const savedBg = localStorage.getItem("background");
-  if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
-
-  renderMissions();
-  renderShop();
-  updateCoins();
-</script>
-</body>
-</html>
 
