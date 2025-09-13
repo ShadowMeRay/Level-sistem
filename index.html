@@ -1,211 +1,254 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Level System</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Level System — Sync</title>
   <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: var(--bg, #1e1e2f);
-      color: var(--text, #fff);
-      display: flex;
-      gap: 20px;
+    :root{
+      --bg: linear-gradient(180deg,#0d0d0d,#121212);
+      --accent: #00f7ff;
+      --panel-bg: rgba(10,10,14,0.7);
+      --text: #eef6f8;
     }
-    #sidebar-left, #sidebar-right {
-      width: 250px;
-      padding: 20px;
-      background: rgba(0,0,0,0.2);
-      border-radius: 12px;
-      height: 100vh;
-      overflow-y: auto;
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg); color:var(--text); min-height:100vh;
+      transition:background .3s;
     }
-    #main {
-      flex: 1;
-      padding: 20px;
-    }
-    h2 { margin-top: 0; }
-    button {
-      background: #6c5ce7;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 6px;
-      color: white;
-      cursor: pointer;
-      margin-top: 5px;
-    }
-    input {
-      width: 100%;
-      padding: 6px;
-      margin: 5px 0;
-      border-radius: 4px;
-      border: none;
-    }
-    .mission, .achievement, .item {
-      background: rgba(255,255,255,0.1);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 5px 0;
+
+    #topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;gap:10px}
+    #logo{height:40px;max-width:200px;object-fit:contain}
+    #gearBtn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;cursor:pointer;color:var(--text)}
+    #userPanel{display:flex;gap:8px;align-items:center}
+
+    #app{display:flex;gap:18px;padding:18px;height:calc(100vh - 68px)}
+    .panel{background:var(--panel-bg);border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.6);overflow:auto;background-size:cover;background-position:center}
+
+    .left{width:280px;flex:0 0 280px}
+    .center{flex:1;display:flex;flex-direction:column;align-items:center}
+    .right{width:320px;flex:0 0 320px}
+
+    h1{color:var(--accent);margin:4px 0 12px;font-size:20px}
+    h2{color:var(--accent);margin:8px 0}
+
+    .stat-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
+    .xp-bar{background:rgba(255,255,255,0.04);height:12px;border-radius:10px;overflow:hidden}
+    .xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#8af1ff);width:0;transition:width .4s}
+
+    .list{list-style:none;padding:0;margin:8px 0}
+    .list li{background:rgba(255,255,255,0.03);margin:8px 0;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+
+    .missions-list{width:100%;max-width:760px}
+
+    .btn{background:var(--accent);color:#051018;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
+    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
+    .btn.small{padding:6px 8px;font-size:13px}
+    input,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:var(--text);margin:6px 0}
+
+    #settingsDrawer{position:fixed;right:-380px;top:0;width:380px;height:100%;background:rgba(12,12,18,0.98);box-shadow:-20px 0 40px rgba(0,0,0,0.7);padding:18px;transition:right .33s;z-index:999;overflow:auto}
+    #settingsDrawer.open{right:0}
+    .drawer-section{margin-bottom:16px}
+
+    @media (max-width:980px){
+      #app{flex-direction:column;padding:12px;height:auto}
+      .left,.right{width:100%}
+      #settingsDrawer{width:100%;right:-100%}
     }
   </style>
 </head>
 <body>
-  <div id="sidebar-left">
-    <h2>Уровень</h2>
-    <div>Уровень: <span id="level">1</span></div>
-    <div>Опыт: <span id="xp">0</span> / <span id="xpNeeded">100</span></div>
-    <h3>Последние достижения</h3>
-    <div id="recentAchievements"></div>
-    <button onclick="showAllAchievements()">Все достижения</button>
+  <div id="topbar">
+    <img id="logo" src="" alt="Логотип" style="display:none">
+    <div id="userPanel">
+      <div id="signedOut">
+        <input id="email" type="email" placeholder="Email" style="width:200px"/>
+        <input id="password" type="password" placeholder="Пароль" style="width:170px"/>
+        <button id="registerBtn" class="btn small">Регистрация</button>
+        <button id="loginBtn" class="btn small">Вход</button>
+        <button id="googleBtn" class="btn small">Google</button>
+      </div>
+      <div id="signedIn" style="display:none;align-items:center;gap:8px;">
+        <img id="userPhoto" src="" alt="" style="width:36px;height:36px;border-radius:50%;display:none"/>
+        <span id="userName"></span>
+        <button id="logoutBtn" class="btn small">Выйти</button>
+      </div>
+    </div>
+    <button id="gearBtn">⚙️</button>
   </div>
 
-  <div id="main">
-    <h2>Миссии</h2>
-    <input id="missionText" placeholder="Название миссии" />
-    <input id="missionXP" type="number" placeholder="XP за миссию" />
-    <button onclick="addMission()">Добавить миссию</button>
-    <div id="missions"></div>
+  <div id="app">
+    <aside class="panel left" id="statsPanel">
+      <h1>Прогресс</h1>
+      <div class="stat-row"><span>Уровень</span><strong id="level">1</strong></div>
+      <div class="stat-row"><span>XP</span><strong id="xp">0</strong> / <span id="xpNeeded">100</span></div>
+      <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
+      <div class="stat-row"><span>Монеты 💰</span><strong id="coins">0</strong></div>
 
-    <h2>Достижения</h2>
-    <input id="achText" placeholder="Название достижения" />
-    <button onclick="addAchievement()">Добавить достижение</button>
+      <h2>Последние ачивки</h2>
+      <ul id="recentAchievements" class="list"></ul>
+      <button id="toggleAllAchievements" class="btn small">Показать все</button>
+      <ul id="allAchievements" class="list" style="display:none"></ul>
+    </aside>
 
-    <h2>Кастомизация</h2>
-    <input id="bgColor" type="color" /> <button onclick="setBg()">Изменить фон</button>
+    <main class="panel center" id="missionsPanel">
+      <h1>Миссии</h1>
+      <form id="missionForm">
+        <input id="missionTitle" placeholder="Название миссии" required>
+        <input id="missionXP" type="number" placeholder="XP" required>
+        <textarea id="missionDesc" placeholder="Описание"></textarea>
+        <button class="btn" type="submit">Добавить</button>
+      </form>
+      <ul id="missionsList" class="missions-list"></ul>
+    </main>
+
+    <aside class="panel right" id="shopPanel">
+      <h1>Магазин</h1>
+      <input id="shopName" placeholder="Название">
+      <input id="shopCost" type="number" placeholder="Цена (монет)">
+      <button id="addShopBtn" class="btn">Добавить</button>
+      <ul id="shopList" class="list"></ul>
+    </aside>
   </div>
 
-  <div id="sidebar-right">
-    <h2>Магазин</h2>
-    <input id="itemText" placeholder="Название предмета" />
-    <input id="itemCost" type="number" placeholder="Стоимость" />
-    <button onclick="addItem()">Добавить предмет</button>
-    <div id="items"></div>
-    <div>Очки: <span id="points">0</span></div>
+  <!-- settings -->
+  <div id="settingsDrawer">
+    <h2>Настройки</h2>
+    <div class="drawer-section">
+      <strong>Внешний вид</strong>
+      <div><label>Логотип: <input id="logoFile" type="file" accept="image/*"></label></div>
+      <div><label>Фон миссий: <input id="missionsBgFile" type="file" accept="image/*"></label></div>
+      <div><label>Фон магазина: <input id="shopBgFile" type="file" accept="image/*"></label></div>
+      <div><label>Фон статистики: <input id="statsBgFile" type="file" accept="image/*"></label></div>
+      <button id="saveImages" class="btn" style="margin-top:8px">Сохранить картинки</button>
+    </div>
 
-    <hr>
-    <h3>Вход</h3>
-    <input id="email" placeholder="Email" />
-    <input id="password" placeholder="Пароль" type="password" />
-    <button id="loginEmail">Войти / Регистрация</button>
-    <button id="loginGoogle">Войти через Google</button>
-    <button id="logout">Выйти</button>
+    <div class="drawer-section">
+      <strong>Безопасность</strong>
+      <button id="resetProgress" class="btn ghost" style="margin-top:8px">Сбросить прогресс</button>
+    </div>
   </div>
 
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getDatabase, ref, set, get, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword,
-             signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+    import {getDatabase,ref,set,get,update,onValue} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
 
     const firebaseConfig = {
-      apiKey: "AIzaSyDW4SQaVKDmU8kgQ1xO1IlCwKfMoACCLVY",
-      authDomain: "level-sistem.firebaseapp.com",
-      databaseURL: "https://level-sistem-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "level-sistem",
-      storageBucket: "level-sistem.firebasestorage.app",
-      messagingSenderId: "417407528186",
-      appId: "1:417407528186:web:4e8d3f55fe3cf8871ced43"
+      apiKey: "AIzaSyDW4SQaVKDmU8kg...",
+      authDomain: "...",
+      databaseURL: "...",
+      projectId: "...",
+      storageBucket: "...",
+      messagingSenderId: "...",
+      appId: "..."
     };
-
     const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
     const auth = getAuth(app);
+    const db = getDatabase(app);
     const provider = new GoogleAuthProvider();
 
-    let userData = {
-      xp: 0, level: 1, points: 0, missions: [], achievements: [], items: [], bg: "#1e1e2f"
-    };
+    let user=null,data={xp:0,level:1,coins:0,missions:[],shop:[],imgs:{}};
 
-    function xpNeeded(lv){ return 100 * (2 ** (lv - 1)); }
-
-    function saveData(uid){
-      return set(ref(db, "users/" + uid), userData);
+    function save(){
+      if(!user) return;
+      set(ref(db,"users/"+user.uid),data);
     }
-
-    function loadData(uid){
-      return get(ref(db, "users/" + uid)).then(s=>{
-        if(s.exists()) userData = s.val();
-        render();
-      });
-    }
-
     function render(){
-      document.getElementById("level").textContent = userData.level;
-      document.getElementById("xp").textContent = userData.xp;
-      document.getElementById("xpNeeded").textContent = xpNeeded(userData.level);
-      document.getElementById("points").textContent = userData.points;
-      document.body.style.setProperty("--bg", userData.bg);
-
-      const missions = document.getElementById("missions");
-      missions.innerHTML = "";
-      userData.missions.forEach((m,i)=>{
-        const d = document.createElement("div");
-        d.className="mission";
-        d.textContent = m.text+" ("+m.xp+" XP)";
-        d.onclick = ()=>{
-          userData.xp += m.xp;
-          if(userData.xp>=xpNeeded(userData.level)){
-            userData.xp = 0;
-            userData.level++;
-            userData.points += Math.floor(Math.random()*10)+1;
-          }
-          userData.missions.splice(i,1);
-          saveData(auth.currentUser.uid).then(render);
-        }
-        missions.appendChild(d);
-      });
-
-      const items = document.getElementById("items");
-      items.innerHTML="";
-      userData.items.forEach((it,i)=>{
-        const d=document.createElement("div");
-        d.className="item";
-        d.textContent = it.text+" ("+it.cost+")";
-        d.onclick=()=>{
-          if(userData.points>=it.cost){
-            userData.points-=it.cost;
-            userData.items.splice(i,1);
-            saveData(auth.currentUser.uid).then(render);
-          }
-        }
-        items.appendChild(d);
-      });
-
-      document.getElementById("recentAchievements").innerHTML = userData.achievements.slice(-3).map(a=>"<div>"+a+"</div>").join("");
+      document.getElementById("xp").textContent=data.xp;
+      document.getElementById("xpNeeded").textContent=data.level*100;
+      document.getElementById("level").textContent=data.level;
+      document.getElementById("coins").textContent=data.coins;
+      document.getElementById("xpFill").style.width=Math.min(100,(data.xp/(data.level*100))*100)+"%";
+      document.getElementById("missionsList").innerHTML=data.missions.map((m,i)=>`
+        <li>
+          <div><strong>${m.title}</strong> (${m.xp} XP)</div>
+          <div>
+            <button class="btn small" onclick="window.completeMission(${i})">✅</button>
+            <button class="btn small ghost" onclick="window.failMission(${i})">❌</button>
+          </div>
+        </li>`).join("");
+      document.getElementById("shopList").innerHTML=data.shop.map((s,i)=>`
+        <li>
+          <div>${s.name} — ${s.cost} 💰</div>
+          <button class="btn small" onclick="window.buyItem(${i})">Купить</button>
+        </li>`).join("");
+      if(data.imgs.logo) document.getElementById("logo").src=data.imgs.logo,document.getElementById("logo").style.display="block";
+      if(data.imgs.missions) document.getElementById("missionsPanel").style.backgroundImage=`url(${data.imgs.missions})`;
+      if(data.imgs.shop) document.getElementById("shopPanel").style.backgroundImage=`url(${data.imgs.shop})`;
+      if(data.imgs.stats) document.getElementById("statsPanel").style.backgroundImage=`url(${data.imgs.stats})`;
     }
 
-    window.addMission = function(){
-      userData.missions.push({text:missionText.value, xp:+missionXP.value});
-      saveData(auth.currentUser.uid).then(render);
-    };
-    window.addAchievement = function(){
-      userData.achievements.push(achText.value);
-      saveData(auth.currentUser.uid).then(render);
-    };
-    window.addItem = function(){
-      userData.items.push({text:itemText.value, cost:+itemCost.value});
-      saveData(auth.currentUser.uid).then(render);
-    };
-    window.setBg = function(){
-      userData.bg = bgColor.value;
-      saveData(auth.currentUser.uid).then(render);
-    };
-    window.showAllAchievements = function(){
-      alert(userData.achievements.join("\n"));
-    };
+    window.completeMission=i=>{
+      data.xp+=data.missions[i].xp;
+      data.coins+=10;
+      if(data.xp>=data.level*100){data.level++;data.xp=0}
+      data.missions.splice(i,1); save(); render();
+    }
+    window.failMission=i=>{
+      data.missions.splice(i,1); save(); render();
+    }
+    window.buyItem=i=>{
+      if(data.coins>=data.shop[i].cost){data.coins-=data.shop[i].cost;save();render()}
+      else alert("Недостаточно монет!");
+    }
 
-    document.getElementById("loginEmail").onclick=()=>{
-      const email=email.value, pass=password.value;
-      signInWithEmailAndPassword(auth,email,pass)
-      .catch(()=>createUserWithEmailAndPassword(auth,email,pass))
-      .then(user=>user && loadData(auth.currentUser.uid));
-    };
-    document.getElementById("loginGoogle").onclick=()=>{
-      signInWithPopup(auth, provider).then(res=>loadData(res.user.uid));
-    };
-    document.getElementById("logout").onclick=()=>{ signOut(auth); location.reload(); };
+    document.getElementById("missionForm").onsubmit=e=>{
+      e.preventDefault();
+      data.missions.push({title:missionTitle.value,xp:+missionXP.value,desc:missionDesc.value});
+      save(); render(); missionForm.reset();
+    }
+    document.getElementById("addShopBtn").onclick=()=>{
+      data.shop.push({name:shopName.value,cost:+shopCost.value});
+      save(); render();
+    }
 
-    auth.onAuthStateChanged(u=>{ if(u) loadData(u.uid); });
+    document.getElementById("saveImages").onclick=()=>{
+      const files={logo:logoFile,missions:missionsBgFile,shop:shopBgFile,stats:statsBgFile};
+      Object.entries(files).forEach(([k,input])=>{
+        if(input.files[0]){
+          const r=new FileReader();
+          r.onload=e=>{data.imgs[k]=e.target.result; save(); render();}
+          r.readAsDataURL(input.files[0]);
+        }
+      });
+    }
+
+    document.getElementById("resetProgress").onclick=()=>{
+      if(confirm("Точно сбросить?")){
+        if(prompt("Введите RESET")=="RESET"){
+          data={xp:0,level:1,coins:0,missions:[],shop:[],imgs:data.imgs};
+          save(); render();
+        }
+      }
+    }
+
+    document.getElementById("gearBtn").onclick=()=>{
+      document.getElementById("settingsDrawer").classList.toggle("open");
+    }
+
+    onAuthStateChanged(auth,u=>{
+      if(u){
+        user=u;
+        get(ref(db,"users/"+user.uid)).then(s=>{
+          if(s.exists()) data=s.val(); else save();
+          render();
+        });
+        signedOut.style.display="none"; signedIn.style.display="flex";
+        userName.textContent=u.displayName||u.email;
+        if(u.photoURL) userPhoto.src=u.photoURL,userPhoto.style.display="block";
+      } else {
+        user=null;
+        signedOut.style.display="block"; signedIn.style.display="none";
+      }
+    });
+
+    registerBtn.onclick=()=>createUserWithEmailAndPassword(auth,email.value,password.value);
+    loginBtn.onclick=()=>signInWithEmailAndPassword(auth,email.value,password.value);
+    googleBtn.onclick=()=>signInWithPopup(auth,provider);
+    logoutBtn.onclick=()=>signOut(auth);
   </script>
 </body>
 </html>
+
