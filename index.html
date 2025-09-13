@@ -1,254 +1,178 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Level System — Sync</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Миссии и магазин</title>
   <style>
-    :root{
-      --bg: linear-gradient(180deg,#0d0d0d,#121212);
-      --accent: #00f7ff;
-      --panel-bg: rgba(10,10,14,0.7);
-      --text: #eef6f8;
+    body {
+      font-family: sans-serif;
+      background-size: cover;
+      background-position: center;
+      transition: background 0.3s;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
     }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;
-      background:var(--bg); color:var(--text); min-height:100vh;
-      transition:background .3s;
+    h1 { margin-top: 0; }
+    .mission, .shop-item {
+      background: rgba(0,0,0,0.6);
+      margin: 10px auto;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 400px;
     }
-
-    #topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 16px;gap:10px}
-    #logo{height:40px;max-width:200px;object-fit:contain}
-    #gearBtn{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px;border-radius:8px;cursor:pointer;color:var(--text)}
-    #userPanel{display:flex;gap:8px;align-items:center}
-
-    #app{display:flex;gap:18px;padding:18px;height:calc(100vh - 68px)}
-    .panel{background:var(--panel-bg);border-radius:12px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,0.6);overflow:auto;background-size:cover;background-position:center}
-
-    .left{width:280px;flex:0 0 280px}
-    .center{flex:1;display:flex;flex-direction:column;align-items:center}
-    .right{width:320px;flex:0 0 320px}
-
-    h1{color:var(--accent);margin:4px 0 12px;font-size:20px}
-    h2{color:var(--accent);margin:8px 0}
-
-    .stat-row{display:flex;justify-content:space-between;align-items:center;margin:8px 0}
-    .xp-bar{background:rgba(255,255,255,0.04);height:12px;border-radius:10px;overflow:hidden}
-    .xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),#8af1ff);width:0;transition:width .4s}
-
-    .list{list-style:none;padding:0;margin:8px 0}
-    .list li{background:rgba(255,255,255,0.03);margin:8px 0;padding:10px;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:10px}
-
-    .missions-list{width:100%;max-width:760px}
-
-    .btn{background:var(--accent);color:#051018;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:700}
-    .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--text)}
-    .btn.small{padding:6px 8px;font-size:13px}
-    input,textarea{width:100%;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.2);color:var(--text);margin:6px 0}
-
-    #settingsDrawer{position:fixed;right:-380px;top:0;width:380px;height:100%;background:rgba(12,12,18,0.98);box-shadow:-20px 0 40px rgba(0,0,0,0.7);padding:18px;transition:right .33s;z-index:999;overflow:auto}
-    #settingsDrawer.open{right:0}
-    .drawer-section{margin-bottom:16px}
-
-    @media (max-width:980px){
-      #app{flex-direction:column;padding:12px;height:auto}
-      .left,.right{width:100%}
-      #settingsDrawer{width:100%;right:-100%}
+    .buttons { display: flex; justify-content: center; gap: 10px; margin-top: 10px; }
+    .settings-panel {
+      position: fixed;
+      top: 0; right: -300px;
+      width: 300px; height: 100%;
+      background: rgba(0,0,0,0.85);
+      padding: 20px;
+      transition: right 0.3s;
+    }
+    .settings-panel.open { right: 0; }
+    .gear {
+      position: fixed; top: 20px; right: 20px;
+      font-size: 30px; cursor: pointer;
+    }
+    button {
+      padding: 5px 10px; border: none; border-radius: 5px; cursor: pointer;
+    }
+    button:disabled {
+      opacity: 0.5; cursor: not-allowed;
     }
   </style>
 </head>
 <body>
-  <div id="topbar">
-    <img id="logo" src="" alt="Логотип" style="display:none">
-    <div id="userPanel">
-      <div id="signedOut">
-        <input id="email" type="email" placeholder="Email" style="width:200px"/>
-        <input id="password" type="password" placeholder="Пароль" style="width:170px"/>
-        <button id="registerBtn" class="btn small">Регистрация</button>
-        <button id="loginBtn" class="btn small">Вход</button>
-        <button id="googleBtn" class="btn small">Google</button>
-      </div>
-      <div id="signedIn" style="display:none;align-items:center;gap:8px;">
-        <img id="userPhoto" src="" alt="" style="width:36px;height:36px;border-radius:50%;display:none"/>
-        <span id="userName"></span>
-        <button id="logoutBtn" class="btn small">Выйти</button>
-      </div>
-    </div>
-    <button id="gearBtn">⚙️</button>
-  </div>
 
-  <div id="app">
-    <aside class="panel left" id="statsPanel">
-      <h1>Прогресс</h1>
-      <div class="stat-row"><span>Уровень</span><strong id="level">1</strong></div>
-      <div class="stat-row"><span>XP</span><strong id="xp">0</strong> / <span id="xpNeeded">100</span></div>
-      <div class="xp-bar"><div id="xpFill" class="xp-fill"></div></div>
-      <div class="stat-row"><span>Монеты 💰</span><strong id="coins">0</strong></div>
+  <h1>Мои миссии</h1>
+  <div id="missions"></div>
 
-      <h2>Последние ачивки</h2>
-      <ul id="recentAchievements" class="list"></ul>
-      <button id="toggleAllAchievements" class="btn small">Показать все</button>
-      <ul id="allAchievements" class="list" style="display:none"></ul>
-    </aside>
+  <h1>Магазин</h1>
+  <div>Монет: <span id="coins">0</span></div>
+  <div id="shop"></div>
 
-    <main class="panel center" id="missionsPanel">
-      <h1>Миссии</h1>
-      <form id="missionForm">
-        <input id="missionTitle" placeholder="Название миссии" required>
-        <input id="missionXP" type="number" placeholder="XP" required>
-        <textarea id="missionDesc" placeholder="Описание"></textarea>
-        <button class="btn" type="submit">Добавить</button>
-      </form>
-      <ul id="missionsList" class="missions-list"></ul>
-    </main>
-
-    <aside class="panel right" id="shopPanel">
-      <h1>Магазин</h1>
-      <input id="shopName" placeholder="Название">
-      <input id="shopCost" type="number" placeholder="Цена (монет)">
-      <button id="addShopBtn" class="btn">Добавить</button>
-      <ul id="shopList" class="list"></ul>
-    </aside>
-  </div>
-
-  <!-- settings -->
-  <div id="settingsDrawer">
+  <div class="gear">⚙️</div>
+  <div class="settings-panel" id="settingsPanel">
     <h2>Настройки</h2>
-    <div class="drawer-section">
-      <strong>Внешний вид</strong>
-      <div><label>Логотип: <input id="logoFile" type="file" accept="image/*"></label></div>
-      <div><label>Фон миссий: <input id="missionsBgFile" type="file" accept="image/*"></label></div>
-      <div><label>Фон магазина: <input id="shopBgFile" type="file" accept="image/*"></label></div>
-      <div><label>Фон статистики: <input id="statsBgFile" type="file" accept="image/*"></label></div>
-      <button id="saveImages" class="btn" style="margin-top:8px">Сохранить картинки</button>
-    </div>
-
-    <div class="drawer-section">
-      <strong>Безопасность</strong>
-      <button id="resetProgress" class="btn ghost" style="margin-top:8px">Сбросить прогресс</button>
-    </div>
+    <label>Фон: <input type="file" id="backgroundUpload" accept="image/*"></label>
+    <hr>
+    <button id="resetProgress">Сбросить прогресс</button>
   </div>
 
-  <script type="module">
-    import {initializeApp} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
-    import {getDatabase,ref,set,get,update,onValue} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-database.js";
+<script>
+  const missionsData = [
+    { id: 1, title: "Миссия 1", img: "", done: false },
+    { id: 2, title: "Миссия 2", img: "", done: false },
+    { id: 3, title: "Миссия 3", img: "", done: false }
+  ];
+  const shopData = [
+    { id: 1, name: "Товар 1", cost: 20, img: "" },
+    { id: 2, name: "Товар 2", cost: 30, img: "" }
+  ];
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyDW4SQaVKDmU8kg...",
-      authDomain: "...",
-      databaseURL: "...",
-      projectId: "...",
-      storageBucket: "...",
-      messagingSenderId: "...",
-      appId: "..."
-    };
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-    const provider = new GoogleAuthProvider();
+  let coins = parseInt(localStorage.getItem("coins")) || 0;
+  let completed = JSON.parse(localStorage.getItem("completed")) || {};
 
-    let user=null,data={xp:0,level:1,coins:0,missions:[],shop:[],imgs:{}};
+  const missionsDiv = document.getElementById("missions");
+  const shopDiv = document.getElementById("shop");
+  const coinsSpan = document.getElementById("coins");
 
-    function save(){
-      if(!user) return;
-      set(ref(db,"users/"+user.uid),data);
-    }
-    function render(){
-      document.getElementById("xp").textContent=data.xp;
-      document.getElementById("xpNeeded").textContent=data.level*100;
-      document.getElementById("level").textContent=data.level;
-      document.getElementById("coins").textContent=data.coins;
-      document.getElementById("xpFill").style.width=Math.min(100,(data.xp/(data.level*100))*100)+"%";
-      document.getElementById("missionsList").innerHTML=data.missions.map((m,i)=>`
-        <li>
-          <div><strong>${m.title}</strong> (${m.xp} XP)</div>
-          <div>
-            <button class="btn small" onclick="window.completeMission(${i})">✅</button>
-            <button class="btn small ghost" onclick="window.failMission(${i})">❌</button>
-          </div>
-        </li>`).join("");
-      document.getElementById("shopList").innerHTML=data.shop.map((s,i)=>`
-        <li>
-          <div>${s.name} — ${s.cost} 💰</div>
-          <button class="btn small" onclick="window.buyItem(${i})">Купить</button>
-        </li>`).join("");
-      if(data.imgs.logo) document.getElementById("logo").src=data.imgs.logo,document.getElementById("logo").style.display="block";
-      if(data.imgs.missions) document.getElementById("missionsPanel").style.backgroundImage=`url(${data.imgs.missions})`;
-      if(data.imgs.shop) document.getElementById("shopPanel").style.backgroundImage=`url(${data.imgs.shop})`;
-      if(data.imgs.stats) document.getElementById("statsPanel").style.backgroundImage=`url(${data.imgs.stats})`;
-    }
+  function save() {
+    localStorage.setItem("coins", coins);
+    localStorage.setItem("completed", JSON.stringify(completed));
+  }
 
-    window.completeMission=i=>{
-      data.xp+=data.missions[i].xp;
-      data.coins+=10;
-      if(data.xp>=data.level*100){data.level++;data.xp=0}
-      data.missions.splice(i,1); save(); render();
-    }
-    window.failMission=i=>{
-      data.missions.splice(i,1); save(); render();
-    }
-    window.buyItem=i=>{
-      if(data.coins>=data.shop[i].cost){data.coins-=data.shop[i].cost;save();render()}
-      else alert("Недостаточно монет!");
-    }
-
-    document.getElementById("missionForm").onsubmit=e=>{
-      e.preventDefault();
-      data.missions.push({title:missionTitle.value,xp:+missionXP.value,desc:missionDesc.value});
-      save(); render(); missionForm.reset();
-    }
-    document.getElementById("addShopBtn").onclick=()=>{
-      data.shop.push({name:shopName.value,cost:+shopCost.value});
-      save(); render();
-    }
-
-    document.getElementById("saveImages").onclick=()=>{
-      const files={logo:logoFile,missions:missionsBgFile,shop:shopBgFile,stats:statsBgFile};
-      Object.entries(files).forEach(([k,input])=>{
-        if(input.files[0]){
-          const r=new FileReader();
-          r.onload=e=>{data.imgs[k]=e.target.result; save(); render();}
-          r.readAsDataURL(input.files[0]);
-        }
-      });
-    }
-
-    document.getElementById("resetProgress").onclick=()=>{
-      if(confirm("Точно сбросить?")){
-        if(prompt("Введите RESET")=="RESET"){
-          data={xp:0,level:1,coins:0,missions:[],shop:[],imgs:data.imgs};
-          save(); render();
-        }
-      }
-    }
-
-    document.getElementById("gearBtn").onclick=()=>{
-      document.getElementById("settingsDrawer").classList.toggle("open");
-    }
-
-    onAuthStateChanged(auth,u=>{
-      if(u){
-        user=u;
-        get(ref(db,"users/"+user.uid)).then(s=>{
-          if(s.exists()) data=s.val(); else save();
-          render();
-        });
-        signedOut.style.display="none"; signedIn.style.display="flex";
-        userName.textContent=u.displayName||u.email;
-        if(u.photoURL) userPhoto.src=u.photoURL,userPhoto.style.display="block";
-      } else {
-        user=null;
-        signedOut.style.display="block"; signedIn.style.display="none";
-      }
+  function renderMissions() {
+    missionsDiv.innerHTML = "";
+    missionsData.forEach(m => {
+      const wrap = document.createElement("div");
+      wrap.className = "mission";
+      wrap.innerHTML = `
+        <h3>${m.title}</h3>
+        <div class="buttons">
+          <button ${completed[m.id] ? "disabled" : ""} data-action="done" data-id="${m.id}">Выполнено</button>
+          <button ${completed[m.id] ? "disabled" : ""} data-action="fail" data-id="${m.id}">Провал</button>
+        </div>
+      `;
+      missionsDiv.appendChild(wrap);
     });
+  }
 
-    registerBtn.onclick=()=>createUserWithEmailAndPassword(auth,email.value,password.value);
-    loginBtn.onclick=()=>signInWithEmailAndPassword(auth,email.value,password.value);
-    googleBtn.onclick=()=>signInWithPopup(auth,provider);
-    logoutBtn.onclick=()=>signOut(auth);
-  </script>
+  function renderShop() {
+    shopDiv.innerHTML = "";
+    shopData.forEach(s => {
+      const wrap = document.createElement("div");
+      wrap.className = "shop-item";
+      wrap.innerHTML = `
+        <h3>${s.name}</h3>
+        <p>Цена: ${s.cost} монет</p>
+        <button data-buy="${s.id}">Купить</button>
+      `;
+      shopDiv.appendChild(wrap);
+    });
+  }
+
+  function updateCoins() {
+    coinsSpan.textContent = coins;
+    save();
+  }
+
+  document.body.addEventListener("click", e => {
+    if (e.target.dataset.action === "done" && !completed[e.target.dataset.id]) {
+      completed[e.target.dataset.id] = true;
+      coins += 10;
+      updateCoins();
+      renderMissions();
+    }
+    if (e.target.dataset.action === "fail" && !completed[e.target.dataset.id]) {
+      completed[e.target.dataset.id] = true;
+      renderMissions();
+    }
+    if (e.target.dataset.buy) {
+      const item = shopData.find(i => i.id == e.target.dataset.buy);
+      if (coins >= item.cost) {
+        coins -= item.cost;
+        updateCoins();
+        alert("Куплено: " + item.name);
+      } else {
+        alert("Недостаточно монет!");
+      }
+    }
+  });
+
+  document.querySelector(".gear").onclick = () => {
+    document.getElementById("settingsPanel").classList.toggle("open");
+  };
+
+  document.getElementById("backgroundUpload").addEventListener("change", e => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        document.body.style.backgroundImage = `url('${reader.result}')`;
+        localStorage.setItem("background", reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+
+  document.getElementById("resetProgress").addEventListener("click", () => {
+    if (confirm("Вы уверены, что хотите сбросить прогресс?") && confirm("Точно уверены?")) {
+      localStorage.clear();
+      location.reload();
+    }
+  });
+
+  // при загрузке
+  const savedBg = localStorage.getItem("background");
+  if (savedBg) document.body.style.backgroundImage = `url('${savedBg}')`;
+
+  renderMissions();
+  renderShop();
+  updateCoins();
+</script>
 </body>
 </html>
 
